@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HerexamenEcommerce24.Models
 {
@@ -16,5 +17,9 @@ namespace HerexamenEcommerce24.Models
         public DateTime OrderDate { get; set; }
 
         public ICollection<Product> Products { get; set; } = new List<Product>();
+
+        [Required]
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

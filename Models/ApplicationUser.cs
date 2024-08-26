@@ -9,5 +9,7 @@ namespace HerexamenEcommerce24.Models
 
         [PersonalData]
         public string LastName { get; set; } = string.Empty;
+        public ICollection<Order> Orders { get; set; }
+
     }
 }
