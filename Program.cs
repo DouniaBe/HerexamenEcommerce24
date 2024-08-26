@@ -1,3 +1,8 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using HerexamenEcommerce24.Data;
+using HerexamenEcommerce24.Models;
+
 namespace HerexamenEcommerce24
 {
     public class Program
@@ -6,16 +11,39 @@ namespace HerexamenEcommerce24
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Voeg DbContext toe aan de container
+            builder.Services.AddDbContext<HerexamenEcommerce24Context>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("HerexamenEcommerce24Context") ?? throw new InvalidOperationException("Connection string 'HerexamenEcommerce24Context' not found.")));
+
+            // Voeg Identity toe aan de services
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddEntityFrameworkStores<HerexamenEcommerce24Context>();
+
+            // Voeg controllers met views toe
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Seed de database
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                try
+                {
+                    SeedData.Initialize(services); // Roept de seeding functie aan
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
+
+            // Configureer de HTTP request pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -24,11 +52,14 @@ namespace HerexamenEcommerce24
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthentication(); // Voeg authenticatie middleware toe
+            app.UseAuthorization();  // Voeg autorisatie middleware toe
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapRazorPages(); // Zorg dat Identity Razor Pages werken
 
             app.Run();
         }
