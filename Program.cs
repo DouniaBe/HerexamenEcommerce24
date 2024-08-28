@@ -6,6 +6,7 @@ using HerexamenEcommerce24.Services;
 using HerexamenEcommerce24.Middleware;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using HerexamenEcommerce2024.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler("/Home/Error");
 app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 
 app.MapControllerRoute(
     name: "default",
